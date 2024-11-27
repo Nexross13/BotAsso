@@ -1,0 +1,14 @@
+{
+  "name": "botasso",
+  "version": "1.0.0",
+  "description": "This is the bot for the @STRI Association. This bot is designed to check the HelloAsso shop and ticket office.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.16.3"
+  }
+}
