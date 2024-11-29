@@ -128,6 +128,7 @@ module.exports = {
 	async execute(client) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
         getNewToken();
+        console.log('Token récupéré');
         // Récupérer les informations du shop
         let latestOrder = await getInfoShop();
         setInterval(async () => {
