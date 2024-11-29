@@ -57,31 +57,67 @@ async function createGraphic(data) {
     try {
         const width = 800; // Largeur du graphique
         const height = 400; // Hauteur du graphique
-        const backgroundColour = 'white';
+        const backgroundColour = 'white'; // Couleur de fond du graphique
 
         const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, backgroundColour });
 
         // Trier les données par ordre croissant de date
         const sortedData = Object.entries(data).sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB));
         const sortedLabels = sortedData.map(([date]) => date); // Dates triées
-        const sortedValues = sortedData.map(([_, value]) => value); // Valeurs correspondantes
+        const sortedValues = sortedData.map(([_, value]) => value); // Montants correspondants
+
+        // Calculer les bénéfices totaux cumulés
+        const cumulativeTotals = [];
+        sortedValues.reduce((acc, value) => {
+            acc += value; // Ajoute la valeur actuelle à l'accumulateur
+            cumulativeTotals.push(acc);
+            return acc;
+        }, 0);
 
         const configuration = {
             type: 'bar',
             data: {
                 labels: sortedLabels, // Dates triées
-                datasets: [{
-                    label: 'Montant total (€)',
-                    data: sortedValues, // Montants triés
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgb(54, 162, 235)',
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Montant par jour (€)',
+                        data: sortedValues, // Montants par jour
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1
+                    },
+                    {
+                        type: 'line',
+                        label: 'Bénéfice total cumulé (€)',
+                        data: cumulativeTotals, // Bénéfices cumulés
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2,
+                        fill: false, // Pas de remplissage sous la courbe
+                        tension: 0.4 // Lissage de la courbe
+                    }
+                ]
             },
             options: {
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Montant (€)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Dates'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
                     }
                 }
             }
@@ -94,7 +130,6 @@ async function createGraphic(data) {
         throw error;
     }
 }
-
 
 module.exports = {
     data: new SlashCommandBuilder()
