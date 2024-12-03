@@ -150,7 +150,13 @@ module.exports = {
             if(compareInfoShop(latestOrder, newOrder)) {
                 latestOrder = newOrder;
             }
-            refreshToken();
+
+            try {
+                refreshToken();
+                console.log('Token rafraîchi');
+            } catch (error) {
+                console.error('Erreur lors du rafraîchissement du token :', error);
+            }
         }, 15 * 60 * 1000); // 15 minutes en millisecondes
 	},
 };
