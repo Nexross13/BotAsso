@@ -19,42 +19,48 @@ async function getInfoShop() {
     return orders;
 }
 
-async function compareInfoShop(oldHistory, newHistory) {
-    if (JSON.stringify(oldHistory) !== JSON.stringify(newHistory)) {
-        const orders1 = new Set(oldHistory.data.map(order => order.order.id));
-        const newOrders = newHistory.data.filter(order => !orders1.has(order.order.id));
+async function getItems() {
+    const url = 'https://api.helloasso.com/v5/organizations/atstri/forms/Shop/merch-et-goodies-2025/items?pageIndex=1&pageSize=20';
+    const options = {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            authorization: 'Bearer ' + client_token_helloasso
+        }
+    };
 
-        // Créer un dictionnaire pour associer les IDs des produits à leurs noms
-        const itemMap = {};
-        items.data.forEach(item => {
-            itemMap[item.id] = item.name;
+    // reponse api dans une variable
+    let response = await fetch(url, options);
+    let jsonData = await response.json();
+    const items = jsonData;
+
+    return items;
+}
+
+async function compareInfoShop(oldHistory, newHistory, items) {
+    // Trouver les nouvelles commandes
+    const oldOlders = new Set(oldHistory.data.map(order => order.order.id));
+    const newOrders = newHistory.data.filter(order => !oldOlders.has(order.order.id));
+    // Créer un dictionnaire pour associer les IDs des produits à leurs noms
+    const itemMap = {};
+    items.data.forEach(item => {
+        itemMap[item.id] = item.name;
+    });
+
+    // Calculer le total détaillé par produit
+    const productQuantities = {};
+
+    newOrders.forEach(order => {
+        order.items.forEach(item => {
+            const productName = itemMap[item.id] || `Produit ID ${item.id}`; // Nom du produit ou ID si non trouvé
+            const quantity = 1; // Chaque ligne représente 1 unité
+        
+            if (!productQuantities[productName]) {
+                productQuantities[productName] = 0;
+            }
+            productQuantities[productName] += quantity;
         });
-
-        // Calculer le total détaillé par produit
-        const productQuantities = {};
-
-        newOrders.forEach(order => {
-            order.items.forEach(item => {
-                const productName = itemMap[item.id] || `Produit ID ${item.id}`; // Nom du produit ou ID si non trouvé
-                const quantity = 1; // Chaque ligne représente 1 unité
-            
-                if (!productQuantities[productName]) {
-                    productQuantities[productName] = 0;
-                }
-                productQuantities[productName] += quantity;
-            });
-        });
-
-        const channel = client.channels.cache.get(salon_id);
-        channel.send('## Nouvelle commande !');
-        Object.entries(productQuantities).forEach(([productName, total]) => {
-            channel.send(`${productName} : ${total}`);
-        });
-        return true;
-    } else {
-        console.log('Pas de nouvelle commande');
-        return false;
-    }
+    });
 }
 
 async function getNewToken() {
@@ -149,8 +155,11 @@ module.exports = {
             } catch (error) {
                 console.error('Erreur lors de la récupération des informations du shop :', error);
             }
+
+            let items = await getItems();
+
             //comparer les deux objets JSON
-            if(compareInfoShop(latestOrder, newOrder)) {
+            if(compareInfoShop(latestOrder, newOrder, items)) {
                 latestOrder = newOrder;
             }
 
