@@ -3,3 +3,4 @@ commands/utility/test.js
 simul1.json
 simul2.json
 item.json
+node_modules/
