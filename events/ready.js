@@ -140,6 +140,9 @@ module.exports = {
             console.error('Erreur lors de la récupération des informations du shop :', error);
         }
         setInterval(async () => {
+            // heure de la vérification
+            console.log(new Date());
+            console.log('Vérification des nouvelles commandes...');
             try {
                 newOrder = await getInfoShop();
                 console.log('Nouvelles informations du shop récupérées !');
