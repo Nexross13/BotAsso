@@ -130,9 +130,21 @@ module.exports = {
         getNewToken();
         console.log('Token récupéré');
         // Récupérer les informations du shop
-        let latestOrder = await getInfoShop();
+        let latestOrder;
+        let newOrder;
+        
+        try {
+            latestOrder = await getInfoShop();
+            console.log('Informations du shop récupérées');
+        } catch (error) {
+            console.error('Erreur lors de la récupération des informations du shop :', error);
+        }
         setInterval(async () => {
-            let newOrder = await getInfoShop();
+            try {
+                newOrder = await getInfoShop();
+            } catch (error) {
+                console.error('Erreur lors de la récupération des informations du shop :', error);
+            }
             //comparer les deux objets JSON
             if(compareInfoShop(latestOrder, newOrder)) {
                 latestOrder = newOrder;
