@@ -142,6 +142,7 @@ module.exports = {
         setInterval(async () => {
             try {
                 newOrder = await getInfoShop();
+                console.log('Nouvelles informations du shop récupérées !');
             } catch (error) {
                 console.error('Erreur lors de la récupération des informations du shop :', error);
             }
